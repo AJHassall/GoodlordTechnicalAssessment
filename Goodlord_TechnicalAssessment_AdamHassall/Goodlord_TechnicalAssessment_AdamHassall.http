@@ -1,0 +1,6 @@
+@Goodlord_TechnicalAssessment_AdamHassall_HostAddress = http://localhost:5013
+
+GET {{Goodlord_TechnicalAssessment_AdamHassall_HostAddress}}/AffordableProperties/
+Accept: application/json
+
+###
