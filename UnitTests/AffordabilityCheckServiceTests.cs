@@ -43,7 +43,7 @@ namespace UnitTests
         }
 
         [Test]
-        public void Test1()
+        public void Affordability_Check_Service_Contains_Expected_Property()
         {
             var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
 
@@ -61,20 +61,41 @@ namespace UnitTests
         }
 
         [Test]
-        public void Test2()
+        public void Affordability_Threshold_Calculates_Correctly()
         {
             var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
-            var expectedIncome = 1254.23m;
             Property expected = new Property(1, "1, Oxford Street", 300);
-            var affordabilityThreshhold = affordabilityCheckService.GetAffordabilityThreshhold(expected.PricePerCalandarMonth);
-
-            
-
+            var affordabilityThreshhold = affordabilityCheckService.GetAffordabilityThreshold(expected.PricePerCalandarMonth);
 
             Assert.That(affordabilityThreshhold, 
                 Is.EqualTo(expected.PricePerCalandarMonth + expected.PricePerCalandarMonth * affordabilityCheckService.GetAffordabiltyMultiplier() ));
 
             Assert.Pass();
         }
+
+        [Test]
+        public void GetAverageIncome_CalculatesCorrectly()
+        {
+            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var expectedAverageIncome = 1254.23m; // Based on your sample data
+
+            var actualAverageIncome = affordabilityCheckService.GetAverageIncome();
+
+            Assert.That(actualAverageIncome, Is.EqualTo(expectedAverageIncome));
+        }
+
+        [Test]
+        public void GetAffordabilityThreshold_HandlesZeroPrice()
+        {
+            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var pricePerCalendarMonth = 0m;
+            var expectedAffordabilityThreshold = 0m; // Or adjust if you have different logic
+
+            var actualAffordabilityThreshold = affordabilityCheckService.GetAffordabilityThreshold(pricePerCalendarMonth);
+
+            Assert.That(actualAffordabilityThreshold, Is.EqualTo(expectedAffordabilityThreshold));
+        }
+
+
     }
 }

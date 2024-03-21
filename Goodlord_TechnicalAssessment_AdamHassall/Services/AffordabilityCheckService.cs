@@ -49,7 +49,7 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
         {
             IEnumerable<Property> properties = _csvImportService.ProcessCSVProperties("Input/properties.csv");
 
-            return properties.Where(property => GetAffordabilityThreshhold(property.PricePerCalandarMonth) < GetAverageIncome()).ToList();
+            return properties.Where(property => GetAffordabilityThreshold(property.PricePerCalandarMonth) < GetAverageIncome()).ToList();
             
         }
 
@@ -58,7 +58,7 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
             return AffordabiltyMultiplier;
         }
 
-        public decimal GetAffordabilityThreshhold(decimal pricePerCalandarMonth)
+        public decimal GetAffordabilityThreshold(decimal pricePerCalandarMonth)
         {
             return pricePerCalandarMonth + pricePerCalandarMonth * AffordabiltyMultiplier;
         }
