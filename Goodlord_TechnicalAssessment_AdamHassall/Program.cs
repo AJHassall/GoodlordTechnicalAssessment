@@ -1,5 +1,6 @@
 
 using Goodlord_TechnicalAssessment_AdamHassall.Services;
+using Goodlord_TechnicalAssessment_AdamHassall.Services.CSVProcessors;
 
 namespace Goodlord_TechnicalAssessment_AdamHassall
 {
@@ -14,7 +15,7 @@ namespace Goodlord_TechnicalAssessment_AdamHassall
             // Add services to the container.
             builder.Services.AddAuthorization();
             builder.Services.AddScoped<AffordabilityCheckService>();
-            builder.Services.AddScoped<CSVImportService>();
+            builder.Services.AddTransient<ICSVProcessorFactory, CSVProcessorFactory>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

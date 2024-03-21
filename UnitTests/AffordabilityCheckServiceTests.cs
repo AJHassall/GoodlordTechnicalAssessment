@@ -1,6 +1,7 @@
 using Goodlord_TechnicalAssessment_AdamHassall.Data;
 using Goodlord_TechnicalAssessment_AdamHassall.Enums;
 using Goodlord_TechnicalAssessment_AdamHassall.Services;
+using Goodlord_TechnicalAssessment_AdamHassall.Services.CSVProcessors;
 using Moq;
 using Newtonsoft.Json.Linq;
 
@@ -8,8 +9,7 @@ namespace UnitTests
 {
     public class Tests
     {
-        private readonly Mock<CSVImportService> CSVImportServiceStub = new Mock<CSVImportService>();
-
+        private readonly Mock<ICSVProcessorFactory> mockCsvProcessorFactory = new Mock<ICSVProcessorFactory>();
 
         [SetUp]
         public void Setup()
@@ -33,19 +33,37 @@ namespace UnitTests
                 new BankTransaction(new DateTime(2020, 2, 4), PaymentTypeEnum.BankCredit,    "Awesome Job Ltd",   null,     1254.23m, 2543.44m)
             }; // date, type, description, money out, money in, balance
 
-            CSVImportServiceStub
-                .Setup(c => c.ProcessCSVProperties(It.IsAny<string>()))
-                .Returns(propertiesData);
+            mockCsvProcessorFactory.Setup(r => r.CreatePropertyProcessor())
+                .Returns(() =>
+                {
+                    var propertyProcesssorMock = new Mock<ICSVProcessor<Property>>();
 
-            CSVImportServiceStub
-                .Setup(c => c.ProcessCSVBankStatement(It.IsAny<string>()))
-                .Returns(statementsData);
+                    propertyProcesssorMock
+                        .Setup(i => i.ProcessCSV(It.IsAny<string>()))
+                        .Returns(propertiesData);
+
+                    return propertyProcesssorMock.Object;
+                });
+
+            mockCsvProcessorFactory.Setup(r => r.CreateBankTransactionProcessor())
+                .Returns(() =>
+                {
+                    var propertyProcesssorMock = new Mock<ICSVProcessor<BankTransaction>>();
+
+                    propertyProcesssorMock
+                        .Setup(i => i.ProcessCSV(It.IsAny<string>()))
+                        .Returns(statementsData);
+
+                    return propertyProcesssorMock.Object;
+                });
+
+
         }
 
         [Test]
         public void Affordability_Check_Service_Contains_Expected_Property()
         {
-            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var affordabilityCheckService = new AffordabilityCheckService(mockCsvProcessorFactory.Object);
 
             Property expected = new Property(1, "1, Oxford Street", 300);
 
@@ -63,7 +81,7 @@ namespace UnitTests
         [Test]
         public void Affordability_Threshold_Calculates_Correctly()
         {
-            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var affordabilityCheckService = new AffordabilityCheckService(mockCsvProcessorFactory.Object);
             Property expected = new Property(1, "1, Oxford Street", 300);
             var affordabilityThreshhold = affordabilityCheckService.GetAffordabilityThreshold(expected.PricePerCalandarMonth);
 
@@ -76,7 +94,7 @@ namespace UnitTests
         [Test]
         public void GetAverageIncome_CalculatesCorrectly()
         {
-            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var affordabilityCheckService = new AffordabilityCheckService(mockCsvProcessorFactory.Object);
             var expectedAverageIncome = 1254.23m; // Based on your sample data
 
             var actualAverageIncome = affordabilityCheckService.GetAverageIncome();
@@ -87,7 +105,7 @@ namespace UnitTests
         [Test]
         public void GetAffordabilityThreshold_HandlesZeroPrice()
         {
-            var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
+            var affordabilityCheckService = new AffordabilityCheckService(mockCsvProcessorFactory.Object);
             var pricePerCalendarMonth = 0m;
             var expectedAffordabilityThreshold = 0m; // Or adjust if you have different logic
 

@@ -9,9 +9,9 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Data
         public DateTime Date { get; set; }
         public PaymentTypeEnum PaymentType { get; set; }
         public string Details{ get; set; }
-        public Decimal? MoneyOut { get; set; }
-        public Decimal? MoneyIn { get; set; }
-        public Decimal Balance { get; set; }
+        public decimal? MoneyOut { get; set; }
+        public decimal? MoneyIn { get; set; }
+        public decimal Balance { get; set; }
 
         public BankTransaction(DateTime date, PaymentTypeEnum paymentType, string details, decimal? moneyOut, decimal? moneyIn, decimal balance)
         {
