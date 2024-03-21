@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using Goodlord_TechnicalAssessment_AdamHassall.CsvClassMaps;
 using Goodlord_TechnicalAssessment_AdamHassall.Data;
 using System.Formats.Asn1;
 using System.Globalization;
@@ -10,14 +11,19 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
     {
         public virtual IEnumerable<BankTransaction> ProcessCSVBankStatement(string filePath)
         {
-            using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                for (var i = 0; i < 9; i++)
+                Delimiter = ",",
+                ShouldSkipRecord = args =>
                 {
-                    csv.Read();
+                    var rawRow = args.Row.Parser.RawRow;
+                    return rawRow < 10 || rawRow == 11;
                 }
-
+            };
+            using (var reader = new StreamReader(filePath))
+            using (var csv = new CsvReader(reader, config))
+            {
+                csv.Context.RegisterClassMap<BankTransactionModelMap>();
                 csv.Read();
                 csv.ReadHeader();
 
@@ -32,11 +38,12 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = ","
+                Delimiter = ",",
             };
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            using (var csv = new CsvReader(reader, config))
             {
+                csv.Context.RegisterClassMap<PropertyModelMap>();
                 csv.Read();
                 csv.ReadHeader();
 

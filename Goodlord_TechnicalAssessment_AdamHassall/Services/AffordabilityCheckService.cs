@@ -14,19 +14,34 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
         {
             _csvImportService = csvImportService;
         }
-        public virtual Decimal GetAverageIncome()
+        public virtual decimal GetAverageIncome()
         {
             IEnumerable<BankTransaction> bankTransactions = _csvImportService.ProcessCSVBankStatement("Input/bank_statement.csv");
 
-            decimal averageIncome = bankTransactions
-                .Where(t => t.PaymentType == PaymentTypeEnum.BankCredit && t.MoneyIn != null)
-                .GroupBy(t => t.Details)
-                .Where(g => g.Count() > 1)  // Ensure a recurring income description exists
-                .Select(group => group.Average(t => t.MoneyIn!.Value))
-                .FirstOrDefault(0m); // Return the first average or 0m if none found 
+            // Filter for recurring income transactions
+            var recurringIncomeTransactions = bankTransactions
+                .Where(transaction => transaction.PaymentType == PaymentTypeEnum.BankCredit)
+                .Where(transaction => transaction.MoneyIn != null)
+                .GroupBy(transaction => transaction.Date);
 
+            // Calculate monthly income totals
+            var monthlyIncomeTotals = recurringIncomeTransactions
+            .Select(group => new
+            {
+                JobDescription = group.Key,  // Include JobDescription
+                MonthlyIncomeTotals = group.GroupBy(transaction => transaction.Date.Month)
+                                           .Select(monthGroup => new
+                                           {
+                                               Month = monthGroup.Key,
+                                               TotalIncome = monthGroup.Sum(transaction => transaction.MoneyIn)
+                                           })
+            });
+
+            var averageMonthlySum = monthlyIncomeTotals
+                .Average(jobData => jobData.MonthlyIncomeTotals.Sum(monthData => monthData.TotalIncome));
             
-            return averageIncome;
+
+            return averageMonthlySum ??= 0;
 
         }
 
@@ -34,7 +49,7 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Services
         {
             IEnumerable<Property> properties = _csvImportService.ProcessCSVProperties("Input/properties.csv");
 
-            return properties.Where(property => GetAffordabilityThreshhold(property.PricePerCalandarMonth) < GetAverageIncome());
+            return properties.Where(property => GetAffordabilityThreshhold(property.PricePerCalandarMonth) < GetAverageIncome()).ToList();
             
         }
 

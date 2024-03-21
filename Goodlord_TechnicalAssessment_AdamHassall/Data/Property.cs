@@ -10,4 +10,9 @@
         Address = address;
         PricePerCalandarMonth = pricePerCalandar;
     }
+
+    public Property()
+    {
+
+    }
 }

@@ -22,5 +22,10 @@ namespace Goodlord_TechnicalAssessment_AdamHassall.Data
             MoneyIn = moneyIn;
             Balance = balance;
         }
+
+        public BankTransaction()
+        {
+
+        }
     }
 }

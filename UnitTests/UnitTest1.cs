@@ -48,7 +48,6 @@ namespace UnitTests
             var affordabilityCheckService = new AffordabilityCheckService(CSVImportServiceStub.Object);
 
             Property expected = new Property(1, "1, Oxford Street", 300);
-            var a= affordabilityCheckService.GetListOfAffordableProperties();
 
             var propertiesInList = affordabilityCheckService.GetListOfAffordableProperties()
                 .FirstOrDefault(property =>
